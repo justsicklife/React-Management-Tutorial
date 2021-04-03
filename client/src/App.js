@@ -8,7 +8,8 @@ import TableBody from "@material-ui/core/TableBody";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import { withStyles } from "@material-ui/core/styles"
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = {
   root: {
@@ -17,12 +18,19 @@ const styles = {
   },
   table: {
     minWidth: 1080
+  },
+  progerss: {
   }
 };
 
 function App() {
 
   const [customers, setCustomers] = useState("");
+  const [completed, setCompleted] = useState(0);
+
+  const progress = () => {
+    setCompleted(completed >= 100 ? 0 : completed + 1);
+  }
 
   const callApi = async () => {
     const response = await fetch('api/customers');
@@ -31,9 +39,12 @@ function App() {
   }
 
   useEffect(() => {
+    const time = setInterval(progress, 20);
     callApi()
-      .then(res =>
-        setCustomers(res))
+      .then(res => {
+        setCustomers(res);
+        clearInterval(time);
+      })
       .catch(err => console.log(err));
   }, []);
 
@@ -54,7 +65,12 @@ function App() {
           {
             customers ? customers.map(c => {
               return <Customer key={c.id} {...c} />
-            }) : ""
+            }) :
+              <TableRow>
+                <TableCell colSpan="6" align="center">
+                  <CircularProgress variant="determinate" value={completed} />
+                </TableCell>
+              </TableRow>
           }
         </TableBody>
       </Table>
