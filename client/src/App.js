@@ -8,6 +8,7 @@ import TableBody from "@material-ui/core/TableBody";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import { withStyles } from "@material-ui/core/styles"
+import { useEffect, useState } from 'react';
 
 const styles = {
   root: {
@@ -19,34 +20,23 @@ const styles = {
   }
 };
 
-const customers = [{
-  'id': 1,
-  'image': 'https://placeimg.com/64/64/1',
-  'name': '홍길동',
-  'birthday': '961222',
-  'gender': '남자',
-  'job': '대학생'
-},
-{
-  'id': 2,
-  'image': 'https://placeimg.com/64/64/2',
-  'name': '홍길동',
-  'birthday': '960305',
-  'gender': '남자',
-  'job': '프로그래머'
-},
-{
-  'id': 3,
-  'image': 'https://placeimg.com/64/64/3',
-  'name': '이순신',
-  'birthday': '301234',
-  'gender': '남자',
-  'job': '사람'
-},
-
-]
-
 function App() {
+
+  const [customers, setCustomers] = useState("");
+
+  const callApi = async () => {
+    const response = await fetch('api/customers');
+    const body = await response.json();
+    return body;
+  }
+
+  useEffect(() => {
+    callApi()
+      .then(res =>
+        setCustomers(res))
+      .catch(err => console.log(err));
+  }, []);
+
   return (
     <Paper className={styles.root}>
       <Table className={styles.table}>
@@ -61,9 +51,11 @@ function App() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {customers.map(c => {
-            return <Customer key={c.id} {...c} />
-          })}
+          {
+            customers ? customers.map(c => {
+              return <Customer key={c.id} {...c} />
+            }) : ""
+          }
         </TableBody>
       </Table>
     </Paper>
